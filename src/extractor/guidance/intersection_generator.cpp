@@ -1,5 +1,10 @@
 #include "extractor/guidance/intersection_generator.hpp"
+
+#include "extractor/geojson_debug_policies.hpp"
+#include "util/geojson_debug_logger.hpp"
+
 #include "extractor/guidance/constants.hpp"
+#include "extractor/guidance/intersection_generator.hpp"
 #include "extractor/guidance/toolkit.hpp"
 
 #include "util/guidance/toolkit.hpp"

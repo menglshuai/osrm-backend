@@ -2,13 +2,14 @@
 #define OSRM_EXTRACTOR_GUIDANCE_INTERSECTION_GENERATOR_HPP_
 
 #include "extractor/compressed_edge_container.hpp"
-#include "extractor/guidance/coordinate_extractor.hpp"
 #include "extractor/guidance/intersection.hpp"
 #include "extractor/query_node.hpp"
 #include "extractor/restriction_map.hpp"
 #include "util/attributes.hpp"
 #include "util/node_based_graph.hpp"
 #include "util/typedefs.hpp"
+
+#include "extractor/guidance/coordinate_extractor.hpp"
 
 #include <unordered_set>
 #include <vector>
@@ -19,6 +20,7 @@ namespace extractor
 {
 namespace guidance
 {
+
 // The Intersection Generator is given a turn location and generates an intersection representation
 // from it. For this all turn possibilities are analysed.
 // We consider turn restrictions to indicate possible turns. U-turns are generated based on profile

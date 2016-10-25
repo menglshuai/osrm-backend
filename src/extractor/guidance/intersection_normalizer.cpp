@@ -17,7 +17,11 @@ IntersectionNormalizer::IntersectionNormalizer(
     const IntersectionGenerator &intersection_generator)
     : node_based_graph(node_based_graph), node_coordinates(node_coordinates),
       name_table(name_table), street_name_suffix_table(street_name_suffix_table),
-      intersection_generator(intersection_generator)
+      intersection_generator(intersection_generator),
+      mergable_road_detector(node_based_graph,
+                             node_coordinates,
+                             intersection_generator,
+                             intersection_generator.GetCoordinateExtractor())
 {
 }
 
@@ -39,135 +43,25 @@ bool IntersectionNormalizer::CanMerge(const NodeID node_at_intersection,
     const auto &first_data = node_based_graph.GetEdgeData(intersection[first_index].eid);
     const auto &second_data = node_based_graph.GetEdgeData(intersection[second_index].eid);
 
+    // don't merge on degree two, since it's most likely a bollard/traffic light or a round way
+    if (intersection.size() <= 2)
+        return false;
+
     // only merge named ids
-    if (first_data.name_id == EMPTY_NAMEID)
+    if (first_data.name_id == EMPTY_NAMEID || second_data.name_id == EMPTY_NAMEID)
         return false;
 
     // need to be same name
-    if (second_data.name_id != EMPTY_NAMEID &&
-        util::guidance::requiresNameAnnounced(
+    if (util::guidance::requiresNameAnnounced(
             first_data.name_id, second_data.name_id, name_table, street_name_suffix_table))
         return false;
 
-    // compatibility is required
-    if (first_data.travel_mode != second_data.travel_mode)
-        return false;
-    if (first_data.road_classification != second_data.road_classification)
+    if (!mergable_road_detector.CanMergeRoad(
+            node_at_intersection, intersection[first_index], intersection[second_index]))
         return false;
 
-    // may not be on a roundabout
-    if (first_data.roundabout || second_data.roundabout)
-        return false;
-
-    // exactly one of them has to be reversed
-    if (first_data.reversed == second_data.reversed)
-        return false;
-
-    // one of them needs to be invalid
-    if (intersection[first_index].entry_allowed && intersection[second_index].entry_allowed)
-        return false;
-
-    // mergeable if the angle is not too big
-    const auto angle_between =
-        angularDeviation(intersection[first_index].angle, intersection[second_index].angle);
-
-    const auto intersection_lanes = intersection.getHighestConnectedLaneCount(node_based_graph);
-
-    const auto coordinate_at_in_edge =
-        intersection_generator.GetCoordinateExtractor().GetCoordinateAlongRoad(
-            node_at_intersection,
-            intersection[0].eid,
-            !INVERT,
-            node_based_graph.GetTarget(intersection[0].eid),
-            intersection_lanes);
-
-    const auto coordinate_at_intersection = node_coordinates[node_at_intersection];
-
-    if (angle_between >= 120)
-        return false;
-
-    const auto isValidYArm = [this,
-                              intersection,
-                              coordinate_at_in_edge,
-                              coordinate_at_intersection,
-                              node_at_intersection](const std::size_t index,
-                                                    const std::size_t other_index) {
-        const auto GetActualTarget = [&](const std::size_t index) {
-            EdgeID last_in_edge_id;
-            intersection_generator.GetActualNextIntersection(
-                node_at_intersection, intersection[index].eid, nullptr, &last_in_edge_id);
-            return node_based_graph.GetTarget(last_in_edge_id);
-        };
-
-        const auto target_id = GetActualTarget(index);
-        const auto other_target_id = GetActualTarget(other_index);
-        if (target_id == node_at_intersection || other_target_id == node_at_intersection)
-            return false;
-
-        const auto coordinate_at_target = node_coordinates[target_id];
-        const auto coordinate_at_other_target = node_coordinates[other_target_id];
-
-        const auto turn_angle = util::coordinate_calculation::computeAngle(
-            coordinate_at_in_edge, coordinate_at_intersection, coordinate_at_target);
-        const auto other_turn_angle = util::coordinate_calculation::computeAngle(
-            coordinate_at_in_edge, coordinate_at_intersection, coordinate_at_other_target);
-
-        const bool becomes_narrower =
-            angularDeviation(turn_angle, other_turn_angle) < NARROW_TURN_ANGLE &&
-            angularDeviation(turn_angle, other_turn_angle) <=
-                angularDeviation(intersection[index].angle, intersection[other_index].angle);
-
-        const bool has_same_deviation =
-            std::abs(angularDeviation(intersection[index].angle, STRAIGHT_ANGLE) -
-                     angularDeviation(intersection[other_index].angle, STRAIGHT_ANGLE)) <
-            MAXIMAL_ALLOWED_NO_TURN_DEVIATION;
-        return becomes_narrower || has_same_deviation;
-    };
-
-    const bool is_y_arm_first = isValidYArm(first_index, second_index);
-    const bool is_y_arm_second = isValidYArm(second_index, first_index);
-
-    // Only merge valid y-arms
-    if (!is_y_arm_first || !is_y_arm_second)
-        return false;
-
-    if (angle_between < 60)
+    else
         return true;
-
-    // Finally, we also allow merging if all streets offer the same name, it is only three roads and
-    // the angle is not fully extreme:
-    if (intersection.size() != 3)
-        return false;
-
-    // since we have an intersection of size three now, there is only one index we are not looking
-    // at right now. The final index in the intersection is calculated next:
-    const std::size_t third_index = [first_index, second_index]() {
-        if (first_index == 0)
-            return second_index == 2 ? 1 : 2;
-        else if (first_index == 1)
-            return second_index == 2 ? 0 : 2;
-        else
-            return second_index == 1 ? 0 : 1;
-    }();
-
-    // needs to be same road coming in
-    const auto &third_data = node_based_graph.GetEdgeData(intersection[third_index].eid);
-
-    if (third_data.name_id != EMPTY_NAMEID &&
-        util::guidance::requiresNameAnnounced(
-            third_data.name_id, first_data.name_id, name_table, street_name_suffix_table))
-        return false;
-
-    // we only allow collapsing of a Y like fork. So the angle to the third index has to be
-    // roughly equal:
-    const auto y_angle_difference = angularDeviation(
-        angularDeviation(intersection[third_index].angle, intersection[first_index].angle),
-        angularDeviation(intersection[third_index].angle, intersection[second_index].angle));
-    // Allow larger angles if its three roads only of the same name
-    // This is a heuristic and might need to be revised.
-    const bool assume_y_intersection =
-        angle_between < 100 && y_angle_difference < FUZZY_ANGLE_DIFFERENCE;
-    return assume_y_intersection;
 }
 
 /*

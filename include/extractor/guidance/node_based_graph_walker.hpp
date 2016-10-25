@@ -87,7 +87,8 @@ struct LengthLimitedCoordinateAccumulator
 };
 
 /*
- * The SelectRoadByNameOnlyChoiceAndStraightness tries to follow a given name along a route. We offer methods to skip
+ * The SelectRoadByNameOnlyChoiceAndStraightness tries to follow a given name along a route. We
+ * offer methods to skip
  * over bridges/similar situations if desired, following narrow turns
  * This struct offers an example implementation of a possible road selector for traversing the
  * node-based graph using the NodeBasedGraphWalker
@@ -112,17 +113,39 @@ struct SelectRoadByNameOnlyChoiceAndStraightness
     const bool requires_entry;
 };
 
+/* Following only a straight road
+ * Follow only the straightmost turn, as long as its the only choice or has the desired name
+ */
+struct SelectStraightmostRoadByNameAndOnlyChoice
+{
+    SelectStraightmostRoadByNameAndOnlyChoice(const NameID desired_name_id,
+                                              const bool requires_entry);
+
+    /*
+     * !! REQUIRED - Function for the use of TraverseRoad in the graph walker.
+     * The operator() needs to return (if any is found) the next road to continue in the graph
+     * traversal. If no such edge is found, return {} is allowed. Usually you want to choose some
+     * form of obious turn to follow.
+     */
+    boost::optional<EdgeID> operator()(const NodeID nid,
+                                       const EdgeID via_edge_id,
+                                       const Intersection &intersection,
+                                       const util::NodeBasedDynamicGraph &node_based_graph) const;
+
+    const NameID desired_name_id;
+    const bool requires_entry;
+};
+
 // find the next intersection given a hop limit
 struct IntersectionFinderAccumulator
 {
-    IntersectionFinderAccumulator(const std::uint8_t hop_limit, const IntersectionGenerator &intersection_generator);
+    IntersectionFinderAccumulator(const std::uint8_t hop_limit,
+                                  const IntersectionGenerator &intersection_generator);
     // true if the path has traversed enough distance
     bool terminate();
 
     // update the accumulator
-    void update(const NodeID from_node,
-                const EdgeID via_edge,
-                const NodeID to_node);
+    void update(const NodeID from_node, const EdgeID via_edge, const NodeID to_node);
 
     std::uint8_t hops;
     const std::uint8_t hop_limit;
@@ -135,8 +158,6 @@ struct IntersectionFinderAccumulator
     EdgeID via_edge_id;
     Intersection intersection;
 };
-
-
 
 template <class accumulator_type, class selector_type>
 boost::optional<std::pair<NodeID, EdgeID>>
