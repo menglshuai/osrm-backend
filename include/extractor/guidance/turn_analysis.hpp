@@ -46,12 +46,13 @@ class TurnAnalysis
                  const ProfileProperties &profile_properties);
 
     // the entry into the turn analysis
-    Intersection getIntersection(const NodeID from_node, const EdgeID via_eid) const;
-    Intersection
-    assignTurnTypes(const NodeID from_node, const EdgeID via_eid, Intersection intersection) const;
+    ConnectedRoads getIntersection(const NodeID from_node, const EdgeID via_eid) const;
+    ConnectedRoads assignTurnTypes(const NodeID from_node,
+                                   const EdgeID via_eid,
+                                   ConnectedRoads intersection) const;
 
     std::vector<TurnOperation>
-    transformIntersectionIntoTurns(const Intersection &intersection) const;
+    transformIntersectionIntoTurns(const ConnectedRoads &intersection) const;
 
     const IntersectionGenerator &getGenerator() const;
 
@@ -64,8 +65,8 @@ class TurnAnalysis
     const SliproadHandler sliproad_handler;
 
     // Utility function, setting basic turn types. Prepares for normal turn handling.
-    Intersection
-    setTurnTypes(const NodeID from, const EdgeID via_edge, Intersection intersection) const;
+    ConnectedRoads
+    setTurnTypes(const NodeID from, const EdgeID via_edge, ConnectedRoads intersection) const;
 }; // class TurnAnalysis
 
 } // namespace guidance

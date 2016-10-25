@@ -36,7 +36,7 @@ IntersectionGenerator::IntersectionGenerator(
 {
 }
 
-Intersection IntersectionGenerator::operator()(const NodeID from_node, const EdgeID via_eid) const
+ConnectedRoads IntersectionGenerator::operator()(const NodeID from_node, const EdgeID via_eid) const
 {
     auto intersection = GetConnectedRoads(from_node, via_eid);
     const auto node_at_intersection = node_based_graph.GetTarget(via_eid);
@@ -57,10 +57,10 @@ Intersection IntersectionGenerator::operator()(const NodeID from_node, const Edg
 // That means we not only get (from_node, turn_node, c) in the above example
 // but also (from_node, turn_node, a), (from_node, turn_node, b). These turns are
 // marked as invalid and only needed for intersection classification.
-Intersection IntersectionGenerator::GetConnectedRoads(const NodeID from_node,
-                                                      const EdgeID via_eid) const
+ConnectedRoads IntersectionGenerator::GetConnectedRoads(const NodeID from_node,
+                                                        const EdgeID via_eid) const
 {
-    Intersection intersection;
+    ConnectedRoads intersection;
     const NodeID turn_node = node_based_graph.GetTarget(via_eid);
     const NodeID only_restriction_to_node = [&]() {
         // If only restrictions refer to invalid ways somewhere far away, we rather ignore the
@@ -216,7 +216,7 @@ Intersection IntersectionGenerator::GetConnectedRoads(const NodeID from_node,
 // Checks for mergability of two ways that represent the same intersection. For further information
 // see interface documentation in header.
 bool IntersectionGenerator::CanMerge(const NodeID node_at_intersection,
-                                     const Intersection &intersection,
+                                     const ConnectedRoads &intersection,
                                      std::size_t first_index,
                                      std::size_t second_index) const
 {
@@ -378,8 +378,8 @@ bool IntersectionGenerator::CanMerge(const NodeID node_at_intersection,
  * Anything containing the first u-turn in a merge affects all other angles
  * and is handled separately from all others.
  */
-Intersection IntersectionGenerator::MergeSegregatedRoads(const NodeID intersection_node,
-                                                         Intersection intersection) const
+ConnectedRoads IntersectionGenerator::MergeSegregatedRoads(const NodeID intersection_node,
+                                                           ConnectedRoads intersection) const
 {
     const auto getRight = [&](std::size_t index) {
         return (index + intersection.size() - 1) % intersection.size();
@@ -541,8 +541,8 @@ Intersection IntersectionGenerator::MergeSegregatedRoads(const NodeID intersecti
 // Where we see the turn to `d` as a right turn, rather than going straight.
 // We do this by adjusting the local turn angle at `x` to turn onto `d` to be reflective of this
 // situation, where `v` would be the node at the intersection.
-Intersection IntersectionGenerator::AdjustForJoiningRoads(const NodeID node_at_intersection,
-                                                          Intersection intersection) const
+ConnectedRoads IntersectionGenerator::AdjustForJoiningRoads(const NodeID node_at_intersection,
+                                                            ConnectedRoads intersection) const
 {
     // nothing to do for dead ends
     if (intersection.size() <= 1)
@@ -634,7 +634,7 @@ Intersection IntersectionGenerator::AdjustForJoiningRoads(const NodeID node_at_i
     return intersection;
 }
 
-Intersection
+ConnectedRoads
 IntersectionGenerator::GetActualNextIntersection(const NodeID starting_node,
                                                  const EdgeID via_edge,
                                                  NodeID *resulting_from_node = nullptr,
@@ -642,7 +642,7 @@ IntersectionGenerator::GetActualNextIntersection(const NodeID starting_node,
 {
     // This function skips over traffic lights/graph compression issues and similar to find the next
     // actual intersection
-    Intersection result = GetConnectedRoads(starting_node, via_edge);
+    ConnectedRoads result = GetConnectedRoads(starting_node, via_edge);
 
     // Skip over stuff that has not been compressed due to barriers/parallel edges
     NodeID node_at_intersection = starting_node;

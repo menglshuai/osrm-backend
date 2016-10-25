@@ -28,26 +28,26 @@ DirectionModifier::Enum getMatchingModifier(const TurnLaneType::Mask tag);
 bool isValidMatch(const TurnLaneType::Mask tag, const TurnInstruction instruction);
 
 // localisation of the best possible match for a tag
-typename Intersection::const_iterator findBestMatch(const TurnLaneType::Mask tag,
-                                                    const Intersection &intersection);
+typename ConnectedRoads::const_iterator findBestMatch(const TurnLaneType::Mask tag,
+                                                      const ConnectedRoads &intersection);
 
 // the quality of a matching to decide between first/second possibility on segregated intersections
 double getMatchingQuality(const TurnLaneType::Mask tag, const ConnectedRoad &road);
 
-typename Intersection::const_iterator findBestMatchForReverse(const TurnLaneType::Mask leftmost_tag,
-                                                              const Intersection &intersection);
+typename ConnectedRoads::const_iterator
+findBestMatchForReverse(const TurnLaneType::Mask leftmost_tag, const ConnectedRoads &intersection);
 
 // a match is trivial if all turns can be associated with their best match in a valid way and the
 // matches occur in order
-bool canMatchTrivially(const Intersection &intersection, const LaneDataVector &lane_data);
+bool canMatchTrivially(const ConnectedRoads &intersection, const LaneDataVector &lane_data);
 
 // perform a trivial match on the turn lanes
 OSRM_ATTR_WARN_UNUSED
-Intersection triviallyMatchLanesToTurns(Intersection intersection,
-                                        const LaneDataVector &lane_data,
-                                        const util::NodeBasedDynamicGraph &node_based_graph,
-                                        const LaneDescriptionID lane_string_id,
-                                        LaneDataIdMap &lane_data_to_id);
+ConnectedRoads triviallyMatchLanesToTurns(ConnectedRoads intersection,
+                                          const LaneDataVector &lane_data,
+                                          const util::NodeBasedDynamicGraph &node_based_graph,
+                                          const LaneDescriptionID lane_string_id,
+                                          LaneDataIdMap &lane_data_to_id);
 
 } // namespace lanes
 } // namespace guidance

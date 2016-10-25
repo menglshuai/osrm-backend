@@ -59,7 +59,7 @@ inline void print(const std::vector<engine::guidance::RouteStep> &steps)
     }
 }
 
-inline void print(const extractor::guidance::Intersection &intersection)
+inline void print(const extractor::guidance::ConnectedRoads &intersection)
 {
     std::cout << "  Intersection:\n";
     for (const auto &road : intersection)
@@ -68,7 +68,7 @@ inline void print(const extractor::guidance::Intersection &intersection)
 }
 
 inline void print(const NodeBasedDynamicGraph &node_based_graph,
-                  const extractor::guidance::Intersection &intersection)
+                  const extractor::guidance::ConnectedRoads &intersection)
 {
     std::cout << "  Intersection:\n";
     for (const auto &road : intersection)
@@ -96,7 +96,7 @@ inline void print(const extractor::guidance::lanes::LaneDataVector &turn_lane_da
 inline void
 printTurnAssignmentData(const NodeID at,
                         const extractor::guidance::lanes::LaneDataVector &turn_lane_data,
-                        const extractor::guidance::Intersection &intersection,
+                        const extractor::guidance::ConnectedRoads &intersection,
                         const std::vector<extractor::QueryNode> &node_info_list)
 {
     std::cout << "[Turn Assignment Progress]\nLocation:";

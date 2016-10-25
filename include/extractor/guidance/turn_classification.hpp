@@ -25,7 +25,7 @@ namespace guidance
 {
 
 std::pair<util::guidance::EntryClass, util::guidance::BearingClass>
-classifyIntersection(Intersection intersection);
+classifyIntersection(ConnectedRoads intersection);
 
 } // namespace guidance
 } // namespace extractor

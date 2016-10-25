@@ -79,7 +79,8 @@ class TurnLaneHandler
     ~TurnLaneHandler();
 
     OSRM_ATTR_WARN_UNUSED
-    Intersection assignTurnLanes(const NodeID at, const EdgeID via_edge, Intersection intersection);
+    ConnectedRoads
+    assignTurnLanes(const NodeID at, const EdgeID via_edge, ConnectedRoads intersection);
 
   private:
     mutable std::atomic<std::size_t> count_handled;
@@ -96,39 +97,39 @@ class TurnLaneHandler
     // Find out which scenario we have to handle
     TurnLaneScenario deduceScenario(const NodeID at,
                                     const EdgeID via_edge,
-                                    const Intersection &intersection,
+                                    const ConnectedRoads &intersection,
                                     // Output Parameters to reduce repeated creation
                                     LaneDescriptionID &lane_description_id,
                                     LaneDataVector &lane_data,
                                     NodeID &previous_node,
                                     EdgeID &previous_id,
-                                    Intersection &previous_intersection,
+                                    ConnectedRoads &previous_intersection,
                                     LaneDataVector &previous_lane_data,
                                     LaneDescriptionID &previous_description_id);
 
     // check whether we can handle an intersection
     bool isSimpleIntersection(const LaneDataVector &turn_lane_data,
-                              const Intersection &intersection) const;
+                              const ConnectedRoads &intersection) const;
 
     // in case of a simple intersection, assign the lane entries
     OSRM_ATTR_WARN_UNUSED
-    Intersection simpleMatchTuplesToTurns(Intersection intersection,
-                                          const LaneDataVector &lane_data,
-                                          const LaneDescriptionID lane_string_id);
+    ConnectedRoads simpleMatchTuplesToTurns(ConnectedRoads intersection,
+                                            const LaneDataVector &lane_data,
+                                            const LaneDescriptionID lane_string_id);
 
     // partition lane data into lane data relevant at current turn and at next turn
     OSRM_ATTR_WARN_UNUSED
     std::pair<TurnLaneHandler::LaneDataVector, TurnLaneHandler::LaneDataVector> partitionLaneData(
-        const NodeID at, LaneDataVector turn_lane_data, const Intersection &intersection) const;
+        const NodeID at, LaneDataVector turn_lane_data, const ConnectedRoads &intersection) const;
 
     // Sliproad turns have a separated lane to the right/left of other depicted lanes. These lanes
     // are not necessarily separated clearly from the rest of the way. As a result, we combine both
     // lane entries for our output, while performing the matching with the separated lanes only.
     OSRM_ATTR_WARN_UNUSED
-    Intersection handleSliproadTurn(Intersection intersection,
-                                    const LaneDescriptionID lane_description_id,
-                                    LaneDataVector lane_data,
-                                    const Intersection &previous_intersection);
+    ConnectedRoads handleSliproadTurn(ConnectedRoads intersection,
+                                      const LaneDescriptionID lane_description_id,
+                                      LaneDataVector lane_data,
+                                      const ConnectedRoads &previous_intersection);
 
     // get the lane data for an intersection
     void extractLaneData(const EdgeID via_edge,

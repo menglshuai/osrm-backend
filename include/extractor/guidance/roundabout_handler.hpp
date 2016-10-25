@@ -54,21 +54,21 @@ class RoundaboutHandler : public IntersectionHandler
     // check whether the handler can actually handle the intersection
     bool canProcess(const NodeID from_nid,
                     const EdgeID via_eid,
-                    const Intersection &intersection) const override final;
+                    const ConnectedRoads &intersection) const override final;
 
     // process the intersection
-    Intersection operator()(const NodeID from_nid,
-                            const EdgeID via_eid,
-                            Intersection intersection) const override final;
+    ConnectedRoads operator()(const NodeID from_nid,
+                              const EdgeID via_eid,
+                              ConnectedRoads intersection) const override final;
 
   private:
     detail::RoundaboutFlags getRoundaboutFlags(const NodeID from_nid,
                                                const EdgeID via_eid,
-                                               const Intersection &intersection) const;
+                                               const ConnectedRoads &intersection) const;
 
     void invalidateExitAgainstDirection(const NodeID from_nid,
                                         const EdgeID via_eid,
-                                        Intersection &intersection) const;
+                                        ConnectedRoads &intersection) const;
 
     // decide whether we lookk at a roundabout or a rotary
     RoundaboutType getRoundaboutType(const NodeID nid) const;
@@ -77,11 +77,11 @@ class RoundaboutHandler : public IntersectionHandler
     // Processing of roundabouts
     // Produces instructions to enter/exit a roundabout or to stay on it.
     // Performs the distinction between roundabout and rotaries.
-    Intersection handleRoundabouts(const RoundaboutType roundabout_type,
-                                   const EdgeID via_edge,
-                                   const bool on_roundabout,
-                                   const bool can_exit_roundabout,
-                                   Intersection intersection) const;
+    ConnectedRoads handleRoundabouts(const RoundaboutType roundabout_type,
+                                     const EdgeID via_edge,
+                                     const bool on_roundabout,
+                                     const bool can_exit_roundabout,
+                                     ConnectedRoads intersection) const;
 
     bool
     qualifiesAsRoundaboutIntersection(const std::unordered_set<NodeID> &roundabout_nodes) const;

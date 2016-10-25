@@ -39,7 +39,7 @@ RoundaboutHandler::RoundaboutHandler(const util::NodeBasedDynamicGraph &node_bas
 
 bool RoundaboutHandler::canProcess(const NodeID from_nid,
                                    const EdgeID via_eid,
-                                   const Intersection &intersection) const
+                                   const ConnectedRoads &intersection) const
 {
     const auto flags = getRoundaboutFlags(from_nid, via_eid, intersection);
     if (!flags.on_roundabout && !flags.can_enter)
@@ -49,8 +49,8 @@ bool RoundaboutHandler::canProcess(const NodeID from_nid,
     return roundabout_type != RoundaboutType::None;
 }
 
-Intersection RoundaboutHandler::
-operator()(const NodeID from_nid, const EdgeID via_eid, Intersection intersection) const
+ConnectedRoads RoundaboutHandler::
+operator()(const NodeID from_nid, const EdgeID via_eid, ConnectedRoads intersection) const
 {
     invalidateExitAgainstDirection(from_nid, via_eid, intersection);
     const auto flags = getRoundaboutFlags(from_nid, via_eid, intersection);
@@ -64,7 +64,7 @@ operator()(const NodeID from_nid, const EdgeID via_eid, Intersection intersectio
 }
 
 detail::RoundaboutFlags RoundaboutHandler::getRoundaboutFlags(
-    const NodeID from_nid, const EdgeID via_eid, const Intersection &intersection) const
+    const NodeID from_nid, const EdgeID via_eid, const ConnectedRoads &intersection) const
 {
     const auto &in_edge_data = node_based_graph.GetEdgeData(via_eid);
     bool on_roundabout = in_edge_data.roundabout;
@@ -103,7 +103,7 @@ detail::RoundaboutFlags RoundaboutHandler::getRoundaboutFlags(
 
 void RoundaboutHandler::invalidateExitAgainstDirection(const NodeID from_nid,
                                                        const EdgeID via_eid,
-                                                       Intersection &intersection) const
+                                                       ConnectedRoads &intersection) const
 {
     const auto &in_edge_data = node_based_graph.GetEdgeData(via_eid);
     if (in_edge_data.roundabout)
@@ -354,11 +354,11 @@ RoundaboutType RoundaboutHandler::getRoundaboutType(const NodeID nid) const
     return RoundaboutType::Roundabout;
 }
 
-Intersection RoundaboutHandler::handleRoundabouts(const RoundaboutType roundabout_type,
-                                                  const EdgeID via_eid,
-                                                  const bool on_roundabout,
-                                                  const bool can_exit_roundabout_separately,
-                                                  Intersection intersection) const
+ConnectedRoads RoundaboutHandler::handleRoundabouts(const RoundaboutType roundabout_type,
+                                                    const EdgeID via_eid,
+                                                    const bool on_roundabout,
+                                                    const bool can_exit_roundabout_separately,
+                                                    ConnectedRoads intersection) const
 {
     // detect via radius (get via circle through three vertices)
     NodeID node_v = node_based_graph.GetTarget(via_eid);

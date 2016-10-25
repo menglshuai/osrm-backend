@@ -37,12 +37,12 @@ class TurnHandler : public IntersectionHandler
     // check whether the handler can actually handle the intersection
     bool canProcess(const NodeID nid,
                     const EdgeID via_eid,
-                    const Intersection &intersection) const override final;
+                    const ConnectedRoads &intersection) const override final;
 
     // process the intersection
-    Intersection operator()(const NodeID nid,
-                            const EdgeID via_eid,
-                            Intersection intersection) const override final;
+    ConnectedRoads operator()(const NodeID nid,
+                              const EdgeID via_eid,
+                              ConnectedRoads intersection) const override final;
 
   private:
     bool isObviousOfTwo(const EdgeID via_edge,
@@ -50,36 +50,36 @@ class TurnHandler : public IntersectionHandler
                         const ConnectedRoad &other) const;
     // Dead end.
     OSRM_ATTR_WARN_UNUSED
-    Intersection handleOneWayTurn(Intersection intersection) const;
+    ConnectedRoads handleOneWayTurn(ConnectedRoads intersection) const;
 
     // Mode Changes, new names...
     OSRM_ATTR_WARN_UNUSED
-    Intersection handleTwoWayTurn(const EdgeID via_edge, Intersection intersection) const;
+    ConnectedRoads handleTwoWayTurn(const EdgeID via_edge, ConnectedRoads intersection) const;
 
     // Forks, T intersections and similar
     OSRM_ATTR_WARN_UNUSED
-    Intersection handleThreeWayTurn(const EdgeID via_edge, Intersection intersection) const;
+    ConnectedRoads handleThreeWayTurn(const EdgeID via_edge, ConnectedRoads intersection) const;
 
     // Handling of turns larger then degree three
     OSRM_ATTR_WARN_UNUSED
-    Intersection handleComplexTurn(const EdgeID via_edge, Intersection intersection) const;
+    ConnectedRoads handleComplexTurn(const EdgeID via_edge, ConnectedRoads intersection) const;
 
     void
     handleDistinctConflict(const EdgeID via_edge, ConnectedRoad &left, ConnectedRoad &right) const;
 
     // Classification
     std::pair<std::size_t, std::size_t> findFork(const EdgeID via_edge,
-                                                 const Intersection &intersection) const;
+                                                 const ConnectedRoads &intersection) const;
 
     OSRM_ATTR_WARN_UNUSED
-    Intersection assignLeftTurns(const EdgeID via_edge,
-                                 Intersection intersection,
-                                 const std::size_t starting_at) const;
+    ConnectedRoads assignLeftTurns(const EdgeID via_edge,
+                                   ConnectedRoads intersection,
+                                   const std::size_t starting_at) const;
 
     OSRM_ATTR_WARN_UNUSED
-    Intersection assignRightTurns(const EdgeID via_edge,
-                                  Intersection intersection,
-                                  const std::size_t up_to) const;
+    ConnectedRoads assignRightTurns(const EdgeID via_edge,
+                                    ConnectedRoads intersection,
+                                    const std::size_t up_to) const;
 };
 
 } // namespace guidance

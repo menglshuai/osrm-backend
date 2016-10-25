@@ -35,26 +35,26 @@ class MotorwayHandler : public IntersectionHandler
     // check whether the handler can actually handle the intersection
     bool canProcess(const NodeID nid,
                     const EdgeID via_eid,
-                    const Intersection &intersection) const override final;
+                    const ConnectedRoads &intersection) const override final;
 
     // process the intersection
-    Intersection operator()(const NodeID nid,
-                            const EdgeID via_eid,
-                            Intersection intersection) const override final;
+    ConnectedRoads operator()(const NodeID nid,
+                              const EdgeID via_eid,
+                              ConnectedRoads intersection) const override final;
 
   private:
     OSRM_ATTR_WARN_UNUSED
-    Intersection handleSliproads(const NodeID intersection_node_id,
-                                 Intersection intersection) const;
+    ConnectedRoads handleSliproads(const NodeID intersection_node_id,
+                                   ConnectedRoads intersection) const;
 
     OSRM_ATTR_WARN_UNUSED
-    Intersection fromMotorway(const EdgeID via_edge, Intersection intersection) const;
+    ConnectedRoads fromMotorway(const EdgeID via_edge, ConnectedRoads intersection) const;
 
     OSRM_ATTR_WARN_UNUSED
-    Intersection fromRamp(const EdgeID via_edge, Intersection intersection) const;
+    ConnectedRoads fromRamp(const EdgeID via_edge, ConnectedRoads intersection) const;
 
     OSRM_ATTR_WARN_UNUSED
-    Intersection fallback(Intersection intersection) const;
+    ConnectedRoads fallback(ConnectedRoads intersection) const;
 };
 
 } // namespace guidance

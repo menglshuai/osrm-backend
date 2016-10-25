@@ -27,7 +27,7 @@ struct TurnPossibility
 };
 
 std::pair<util::guidance::EntryClass, util::guidance::BearingClass>
-classifyIntersection(Intersection intersection)
+classifyIntersection(ConnectedRoads intersection)
 {
     if (intersection.empty())
         return {};

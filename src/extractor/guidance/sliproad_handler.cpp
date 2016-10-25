@@ -37,13 +37,13 @@ SliproadHandler::SliproadHandler(const IntersectionGenerator &intersection_gener
 // included for interface reasons only
 bool SliproadHandler::canProcess(const NodeID /*nid*/,
                                  const EdgeID /*via_eid*/,
-                                 const Intersection &intersection) const
+                                 const ConnectedRoads &intersection) const
 {
     return intersection.size() > 2;
 }
 
-Intersection SliproadHandler::
-operator()(const NodeID, const EdgeID source_edge_id, Intersection intersection) const
+ConnectedRoads SliproadHandler::
+operator()(const NodeID, const EdgeID source_edge_id, ConnectedRoads intersection) const
 {
     auto intersection_node_id = node_based_graph.GetTarget(source_edge_id);
 
@@ -107,7 +107,7 @@ operator()(const NodeID, const EdgeID source_edge_id, Intersection intersection)
             // itself. If that is the case, the road is obviously not a sliproad.
 
             // a sliproad has to enter a road without choice
-            const auto couldBeSliproad = [](const Intersection &intersection) {
+            const auto couldBeSliproad = [](const ConnectedRoads &intersection) {
                 if (intersection.size() != 3)
                     return false;
                 if ((intersection[1].entry_allowed && intersection[2].entry_allowed) ||

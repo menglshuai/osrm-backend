@@ -36,12 +36,12 @@ class SliproadHandler : public IntersectionHandler
     // check whether the handler can actually handle the intersection
     bool canProcess(const NodeID /*nid*/,
                     const EdgeID /*via_eid*/,
-                    const Intersection & /*intersection*/) const override final;
+                    const ConnectedRoads & /*intersection*/) const override final;
 
     // process the intersection
-    Intersection operator()(const NodeID nid,
-                            const EdgeID via_eid,
-                            Intersection intersection) const override final;
+    ConnectedRoads operator()(const NodeID nid,
+                              const EdgeID via_eid,
+                              ConnectedRoads intersection) const override final;
 };
 
 } // namespace guidance

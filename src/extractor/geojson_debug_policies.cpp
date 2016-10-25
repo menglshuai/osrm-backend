@@ -18,7 +18,7 @@ IntersectionPrinter::IntersectionPrinter(
 
 util::json::Array IntersectionPrinter::
 operator()(const NodeID intersection_node,
-           const extractor::guidance::Intersection &intersection,
+           const extractor::guidance::ConnectedRoads &intersection,
            const boost::optional<util::json::Object> &node_style,
            const boost::optional<util::json::Object> &way_style) const
 {

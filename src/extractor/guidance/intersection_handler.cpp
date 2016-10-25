@@ -38,13 +38,17 @@ IntersectionHandler::IntersectionHandler(const util::NodeBasedDynamicGraph &node
 {
 }
 
-std::size_t IntersectionHandler::countValid(const Intersection &intersection) const
+std::size_t IntersectionHandler::countValid(const ConnectedRoads &intersection) const
 {
     return std::count_if(intersection.begin(), intersection.end(), [](const ConnectedRoad &road) {
         return road.entry_allowed;
     });
 }
 
+// Checks whether a turn from `via_edge` onto `road` is a turn
+// - on a ramp
+// - a continue
+// - or a normal turn
 TurnType::Enum IntersectionHandler::findBasicTurnType(const EdgeID via_edge,
                                                       const ConnectedRoad &road) const
 {
@@ -327,7 +331,7 @@ void IntersectionHandler::assignFork(const EdgeID via_edge,
 }
 
 void IntersectionHandler::assignTrivialTurns(const EdgeID via_eid,
-                                             Intersection &intersection,
+                                             ConnectedRoads &intersection,
                                              const std::size_t begin,
                                              const std::size_t end) const
 {
@@ -338,7 +342,7 @@ void IntersectionHandler::assignTrivialTurns(const EdgeID via_eid,
 }
 
 bool IntersectionHandler::isThroughStreet(const std::size_t index,
-                                          const Intersection &intersection) const
+                                          const ConnectedRoads &intersection) const
 {
     const auto &data_at_index = node_based_graph.GetEdgeData(intersection[index].eid);
 
@@ -373,7 +377,7 @@ bool IntersectionHandler::isThroughStreet(const std::size_t index,
 }
 
 std::size_t IntersectionHandler::findObviousTurn(const EdgeID via_edge,
-                                                 const Intersection &intersection) const
+                                                 const ConnectedRoads &intersection) const
 {
     // no obvious road
     if (intersection.size() == 1)

@@ -37,7 +37,7 @@ class IntersectionGenerator
                           const util::NameTable &name_table,
                           const SuffixTable &street_name_suffix_table);
 
-    Intersection operator()(const NodeID nid, const EdgeID via_eid) const;
+    ConnectedRoads operator()(const NodeID nid, const EdgeID via_eid) const;
 
     // Graph Compression cannot compress every setting. For example any barrier/traffic light cannot
     // be compressed. As a result, a simple road of the form `a ----- b` might end up as having an
@@ -45,10 +45,10 @@ class IntersectionGenerator
     // down a road, finding the next actual decision requires the look at multiple intersections.
     // Here we follow the road until we either reach a dead end or find the next intersection with
     // more than a single next road.
-    Intersection GetActualNextIntersection(const NodeID starting_node,
-                                           const EdgeID via_edge,
-                                           NodeID *resulting_from_node,
-                                           EdgeID *resulting_via_edge) const;
+    ConnectedRoads GetActualNextIntersection(const NodeID starting_node,
+                                             const EdgeID via_edge,
+                                             NodeID *resulting_from_node,
+                                             EdgeID *resulting_via_edge) const;
 
     // Allow access to the coordinate extractor for all owners
     const CoordinateExtractor &GetCoordinateExtractor() const;
@@ -59,7 +59,7 @@ class IntersectionGenerator
     // from `from_node` via `via_eid`
     // The resulting candidates have to be analysed for their actual instructions later on.
     OSRM_ATTR_WARN_UNUSED
-    Intersection GetConnectedRoads(const NodeID from_node, const EdgeID via_eid) const;
+    ConnectedRoads GetConnectedRoads(const NodeID from_node, const EdgeID via_eid) const;
 
   private:
     const util::NodeBasedDynamicGraph &node_based_graph;
@@ -74,7 +74,7 @@ class IntersectionGenerator
     // intersection representation. See below for an example. Utility function for
     // MergeSegregatedRoads
     bool CanMerge(const NodeID intersection_node,
-                  const Intersection &intersection,
+                  const ConnectedRoads &intersection,
                   std::size_t first_index,
                   std::size_t second_index) const;
 
@@ -90,8 +90,8 @@ class IntersectionGenerator
     // The treatment results in a straight turn angle of 180º rather than a turn angle of approx
     // 160
     OSRM_ATTR_WARN_UNUSED
-    Intersection MergeSegregatedRoads(const NodeID intersection_node,
-                                      Intersection intersection) const;
+    ConnectedRoads MergeSegregatedRoads(const NodeID intersection_node,
+                                        ConnectedRoads intersection) const;
 
     // The counterpiece to mergeSegregatedRoads. While we can adjust roads that split up at the
     // intersection itself, it can also happen that intersections are connected to joining roads.
@@ -105,8 +105,8 @@ class IntersectionGenerator
     //
     // for the local view of b at a.
     OSRM_ATTR_WARN_UNUSED
-    Intersection AdjustForJoiningRoads(const NodeID node_at_intersection,
-                                       Intersection intersection) const;
+    ConnectedRoads AdjustForJoiningRoads(const NodeID node_at_intersection,
+                                         ConnectedRoads intersection) const;
 };
 
 } // namespace guidance

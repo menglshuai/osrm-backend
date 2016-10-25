@@ -55,7 +55,7 @@ MotorwayHandler::MotorwayHandler(const util::NodeBasedDynamicGraph &node_based_g
 
 bool MotorwayHandler::canProcess(const NodeID,
                                  const EdgeID via_eid,
-                                 const Intersection &intersection) const
+                                 const ConnectedRoads &intersection) const
 {
     bool has_motorway = false;
     bool has_normal_roads = false;
@@ -80,8 +80,8 @@ bool MotorwayHandler::canProcess(const NodeID,
     return has_motorway || isMotorwayClass(via_eid, node_based_graph);
 }
 
-Intersection MotorwayHandler::
-operator()(const NodeID, const EdgeID via_eid, Intersection intersection) const
+ConnectedRoads MotorwayHandler::
+operator()(const NodeID, const EdgeID via_eid, ConnectedRoads intersection) const
 {
     // coming from motorway
     if (isMotorwayClass(via_eid, node_based_graph))
@@ -100,12 +100,13 @@ operator()(const NodeID, const EdgeID via_eid, Intersection intersection) const
     }
 }
 
-Intersection MotorwayHandler::fromMotorway(const EdgeID via_eid, Intersection intersection) const
+ConnectedRoads MotorwayHandler::fromMotorway(const EdgeID via_eid,
+                                             ConnectedRoads intersection) const
 {
     const auto &in_data = node_based_graph.GetEdgeData(via_eid);
     BOOST_ASSERT(isMotorwayClass(via_eid, node_based_graph));
 
-    const auto countExitingMotorways = [this](const Intersection &intersection) {
+    const auto countExitingMotorways = [this](const ConnectedRoads &intersection) {
         unsigned count = 0;
         for (const auto &road : intersection)
         {
@@ -116,7 +117,7 @@ Intersection MotorwayHandler::fromMotorway(const EdgeID via_eid, Intersection in
     };
 
     // find the angle that continues on our current highway
-    const auto getContinueAngle = [this, in_data](const Intersection &intersection) {
+    const auto getContinueAngle = [this, in_data](const ConnectedRoads &intersection) {
         for (const auto &road : intersection)
         {
             const auto &out_data = node_based_graph.GetEdgeData(road.eid);
@@ -132,7 +133,7 @@ Intersection MotorwayHandler::fromMotorway(const EdgeID via_eid, Intersection in
         return intersection[0].angle;
     };
 
-    const auto getMostLikelyContinue = [this, in_data](const Intersection &intersection) {
+    const auto getMostLikelyContinue = [this, in_data](const ConnectedRoads &intersection) {
         double angle = intersection[0].angle;
         double best = 180;
         for (const auto &road : intersection)
@@ -343,7 +344,7 @@ Intersection MotorwayHandler::fromMotorway(const EdgeID via_eid, Intersection in
     return intersection;
 }
 
-Intersection MotorwayHandler::fromRamp(const EdgeID via_eid, Intersection intersection) const
+ConnectedRoads MotorwayHandler::fromRamp(const EdgeID via_eid, ConnectedRoads intersection) const
 {
     auto num_valid_turns = countValid(intersection);
     // ramp straight into a motorway/ramp
@@ -497,7 +498,7 @@ Intersection MotorwayHandler::fromRamp(const EdgeID via_eid, Intersection inters
     return intersection;
 }
 
-Intersection MotorwayHandler::fallback(Intersection intersection) const
+ConnectedRoads MotorwayHandler::fallback(ConnectedRoads intersection) const
 {
     for (auto &road : intersection)
     {

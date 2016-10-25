@@ -27,7 +27,7 @@ struct IntersectionPrinter
     // renders the used coordinate locations for all entries/as well as the resulting
     // intersection-classification
     util::json::Array operator()(const NodeID intersection_node,
-                                 const extractor::guidance::Intersection &intersection,
+                                 const extractor::guidance::ConnectedRoads &intersection,
                                  const boost::optional<util::json::Object> &node_style = {},
                                  const boost::optional<util::json::Object> &way_style = {}) const;
 

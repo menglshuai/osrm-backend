@@ -34,13 +34,42 @@ class IntersectionHandler
 
     virtual ~IntersectionHandler() = default;
 
-    // check whether the handler can actually handle the intersection
-    virtual bool
-    canProcess(const NodeID nid, const EdgeID via_eid, const Intersection &intersection) const = 0;
+    // check whether the handler can actually handle
+    // the intersection
+    //     _at_ `node_based_graph.GetTarget(via_edge)`
+    //     _from_ `NodeID`
+    //     _over_ `via_edge`
+    //     _from where_ there are other `connected_roads`
+    //
+    // note that `connected_roads` are ordered from from sharp right counter-clockwise to sharp left
+    // where `connected_roads[0]` is _always_ a u-turn
+    // #ConnectedRoadsExplanation@intersection_handler.hpp
+    //
+    //
+    //                                                 |
+    //                                                 |
+    //                                         (connected_roads[i])
+    //                                                 |
+    //                                                 |
+    //                                                 |
+    //  NodeID ---(via_edge)--- node_based_graph.GetTarget(via_edge)  ---(connected_roads[i'])---
+    //                                                 |
+    //                                                 |
+    //                                                 |
+    //                                         (connected_roads[i])
+    //                                                 |
+    //                                                 |
+    //
+    //
+    // #IntersectionExplanation@intersection_handler.hpp
+    virtual bool canProcess(const NodeID nid,
+                            const EdgeID via_eid,
+                            const ConnectedRoads &intersection) const = 0;
 
-    // process the intersection
-    virtual Intersection
-    operator()(const NodeID nid, const EdgeID via_eid, Intersection intersection) const = 0;
+    // handle and process the intersection with parameters as described in
+    // #IntersectionExplanation@intersection_handler.hpp
+    virtual ConnectedRoads
+    operator()(const NodeID nid, const EdgeID via_eid, ConnectedRoads intersection) const = 0;
 
   protected:
     const util::NodeBasedDynamicGraph &node_based_graph;
@@ -50,7 +79,7 @@ class IntersectionHandler
     const IntersectionGenerator &intersection_generator;
 
     // counts the number on allowed entry roads
-    std::size_t countValid(const Intersection &intersection) const;
+    std::size_t countValid(const ConnectedRoads &intersection) const;
 
     // Decide on a basic turn types
     TurnType::Enum findBasicTurnType(const EdgeID via_edge, const ConnectedRoad &candidate) const;
@@ -59,7 +88,9 @@ class IntersectionHandler
     // determining whether there is a road that can be seen as obvious turn in the presence of many
     // other possible turns. The function will consider road categories and other inputs like the
     // turn angles.
-    std::size_t findObviousTurn(const EdgeID via_edge, const Intersection &intersection) const;
+    // Input parameters describe an intersection as described in
+    // #IntersectionExplanation@intersection_handler.hpp
+    std::size_t findObviousTurn(const EdgeID via_edge, const ConnectedRoads &intersection) const;
 
     // Obvious turns can still take multiple forms. This function looks at the turn onto a road
     // candidate when coming from a via_edge and determines the best instruction to emit.
@@ -79,11 +110,11 @@ class IntersectionHandler
 
     // Trivial Turns use findBasicTurnType and getTurnDirection as only criteria
     void assignTrivialTurns(const EdgeID via_eid,
-                            Intersection &intersection,
+                            ConnectedRoads &intersection,
                             const std::size_t begin,
                             const std::size_t end) const;
 
-    bool isThroughStreet(const std::size_t index, const Intersection &intersection) const;
+    bool isThroughStreet(const std::size_t index, const ConnectedRoads &intersection) const;
 };
 
 } // namespace guidance

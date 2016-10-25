@@ -28,7 +28,7 @@ const constexpr TurnLaneType::Mask tag_by_modifier[] = {TurnLaneType::uturn,
                                                         TurnLaneType::left,
                                                         TurnLaneType::sharp_left};
 
-std::size_t getNumberOfTurns(const Intersection &intersection)
+std::size_t getNumberOfTurns(const ConnectedRoads &intersection)
 {
     return std::count_if(intersection.begin(), intersection.end(), [](const ConnectedRoad &road) {
         return road.entry_allowed;
@@ -38,7 +38,7 @@ std::size_t getNumberOfTurns(const Intersection &intersection)
 LaneDataVector augmentMultiple(const std::size_t none_index,
                                const std::size_t connection_count,
                                LaneDataVector lane_data,
-                               const Intersection &intersection)
+                               const ConnectedRoads &intersection)
 {
 
     // a none-turn is allowing multiple turns. we have to add a lane-data entry for
@@ -152,7 +152,7 @@ LaneDataVector mergeNoneTag(const std::size_t none_index, LaneDataVector lane_da
 
 LaneDataVector handleRenamingSituations(const std::size_t none_index,
                                         LaneDataVector lane_data,
-                                        const Intersection &intersection)
+                                        const ConnectedRoads &intersection)
 {
     bool has_right = false;
     bool has_through = false;
@@ -234,7 +234,7 @@ LaneDataVector handleRenamingSituations(const std::size_t none_index,
    intersection and the lane data to see what turns we have to augment by the none-lanes
  */
 LaneDataVector handleNoneValueAtSimpleTurn(LaneDataVector lane_data,
-                                           const Intersection &intersection)
+                                           const ConnectedRoads &intersection)
 {
     const bool needs_no_processing =
         (intersection.empty() || lane_data.empty() || !hasTag(TurnLaneType::none, lane_data));

@@ -70,14 +70,14 @@ std::string toString(const ConnectedRoad &road)
     return result;
 }
 
-Intersection::Base::iterator Intersection::findClosestTurn(double angle)
+ConnectedRoads::Base::iterator ConnectedRoads::findClosestTurn(double angle)
 {
     // use the const operator to avoid code duplication
     return begin() +
-           std::distance(cbegin(), static_cast<const Intersection *>(this)->findClosestTurn(angle));
+           std::distance(cbegin(), static_cast<const ConnectedRoads *>(this)->findClosestTurn(angle));
 }
 
-Intersection::Base::const_iterator Intersection::findClosestTurn(double angle) const
+ConnectedRoads::Base::const_iterator ConnectedRoads::findClosestTurn(double angle) const
 {
     return std::min_element(
         begin(), end(), [angle](const ConnectedRoad &lhs, const ConnectedRoad &rhs) {
@@ -85,8 +85,7 @@ Intersection::Base::const_iterator Intersection::findClosestTurn(double angle) c
                    util::guidance::angularDeviation(rhs.angle, angle);
         });
 }
-
-bool Intersection::valid() const
+bool ConnectedRoads::valid() const
 {
     return !empty() &&
            std::is_sorted(begin(), end(), std::mem_fn(&ConnectedRoad::compareByAngle)) &&
@@ -94,7 +93,7 @@ bool Intersection::valid() const
 }
 
 std::uint8_t
-Intersection::getHighestConnectedLaneCount(const util::NodeBasedDynamicGraph &graph) const
+ConnectedRoads::getHighestConnectedLaneCount(const util::NodeBasedDynamicGraph &graph) const
 {
     BOOST_ASSERT(valid()); // non empty()
 

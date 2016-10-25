@@ -71,9 +71,9 @@ TurnAnalysis::TurnAnalysis(const util::NodeBasedDynamicGraph &node_based_graph,
 {
 }
 
-Intersection TurnAnalysis::assignTurnTypes(const NodeID from_nid,
-                                           const EdgeID via_eid,
-                                           Intersection intersection) const
+ConnectedRoads TurnAnalysis::assignTurnTypes(const NodeID from_nid,
+                                             const EdgeID via_eid,
+                                             ConnectedRoads intersection) const
 {
     // Roundabouts are a main priority. If there is a roundabout instruction present, we process the
     // turn as a roundabout
@@ -111,7 +111,7 @@ Intersection TurnAnalysis::assignTurnTypes(const NodeID from_nid,
 }
 
 std::vector<TurnOperation>
-TurnAnalysis::transformIntersectionIntoTurns(const Intersection &intersection) const
+TurnAnalysis::transformIntersectionIntoTurns(const ConnectedRoads &intersection) const
 {
     std::vector<TurnOperation> turns;
     for (auto road : intersection)
@@ -121,14 +121,14 @@ TurnAnalysis::transformIntersectionIntoTurns(const Intersection &intersection) c
     return turns;
 }
 
-Intersection TurnAnalysis::getIntersection(const NodeID from_nid, const EdgeID via_eid) const
+ConnectedRoads TurnAnalysis::getIntersection(const NodeID from_nid, const EdgeID via_eid) const
 {
     return intersection_generator(from_nid, via_eid);
 }
 
 // Sets basic turn types as fallback for otherwise unhandled turns
-Intersection
-TurnAnalysis::setTurnTypes(const NodeID from_nid, const EdgeID, Intersection intersection) const
+ConnectedRoads
+TurnAnalysis::setTurnTypes(const NodeID from_nid, const EdgeID, ConnectedRoads intersection) const
 {
     for (auto &road : intersection)
     {

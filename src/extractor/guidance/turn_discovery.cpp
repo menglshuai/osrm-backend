@@ -13,13 +13,13 @@ namespace lanes
 
 bool findPreviousIntersection(const NodeID node_v,
                               const EdgeID via_edge,
-                              const Intersection intersection,
+                              const ConnectedRoads intersection,
                               const TurnAnalysis &turn_analysis,
                               const util::NodeBasedDynamicGraph &node_based_graph,
                               // output parameters
                               NodeID &result_node,
                               EdgeID &result_via_edge,
-                              Intersection &result_intersection)
+                              ConnectedRoads &result_intersection)
 {
     /* We need to find the intersection that is located prior to via_edge.
 
@@ -45,7 +45,8 @@ bool findPreviousIntersection(const NodeID node_v,
     if (via_edge_length > COMBINE_DISTANCE_CUTOFF)
         return false;
 
-    // Node -> Via_Edge -> Intersection[0 == UTURN] -> reverse_of(via_edge) -> Intersection at node
+    // Node -> Via_Edge -> Intersection[0 == UTURN] -> reverse_of(via_edge) -> ConnectedRoads at
+    // node
     // (looking at the reverse direction).
     const auto node_w = node_based_graph.GetTarget(via_edge);
     const auto u_turn_at_node_w = intersection[0].eid;

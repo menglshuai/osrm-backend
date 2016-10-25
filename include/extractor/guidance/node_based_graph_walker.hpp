@@ -108,7 +108,7 @@ struct SelectRoadByNameOnlyChoiceAndStraightness
      */
     boost::optional<EdgeID> operator()(const NodeID nid,
                                        const EdgeID via_edge_id,
-                                       const Intersection &intersection,
+                                       const ConnectedRoads &intersection,
                                        const util::NodeBasedDynamicGraph &node_based_graph) const;
 
     const NameID desired_name_id;
@@ -136,7 +136,7 @@ struct IntersectionFinderAccumulator
     // the result we are looking for
     NodeID nid;
     EdgeID via_edge_id;
-    Intersection intersection;
+    ConnectedRoads intersection;
 };
 
 

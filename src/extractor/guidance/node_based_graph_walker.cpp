@@ -58,7 +58,7 @@ SelectRoadByNameOnlyChoiceAndStraightness::SelectRoadByNameOnlyChoiceAndStraight
 boost::optional<EdgeID> SelectRoadByNameOnlyChoiceAndStraightness::
 operator()(const NodeID /*nid*/,
            const EdgeID /*via_edge_id*/,
-           const Intersection &intersection,
+           const ConnectedRoads &intersection,
            const util::NodeBasedDynamicGraph &node_based_graph) const
 {
     BOOST_ASSERT(!intersection.empty());

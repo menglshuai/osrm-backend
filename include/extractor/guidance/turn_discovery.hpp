@@ -22,13 +22,13 @@ namespace lanes
 bool findPreviousIntersection(
     const NodeID node,
     const EdgeID via_edge,
-    const Intersection intersection,
+    const ConnectedRoads intersection,
     const TurnAnalysis &turn_analysis,                   // to generate other intersections
     const util::NodeBasedDynamicGraph &node_based_graph, // query edge data
     // output parameters, will be in an arbitrary state on failure
     NodeID &result_node,
     EdgeID &result_via_edge,
-    Intersection &result_intersection);
+    ConnectedRoads &result_intersection);
 
 } // namespace lanes
 } // namespace guidance

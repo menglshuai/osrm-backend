@@ -16,7 +16,7 @@ namespace lanes
 
 OSRM_ATTR_WARN_UNUSED
 LaneDataVector handleNoneValueAtSimpleTurn(LaneDataVector lane_data,
-                                           const Intersection &intersection);
+                                           const ConnectedRoads &intersection);
 
 } // namespace lanes
 } // namespace guidance

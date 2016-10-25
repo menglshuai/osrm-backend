@@ -116,8 +116,8 @@ double getMatchingQuality(const TurnLaneType::Mask tag, const ConnectedRoad &roa
 // (or follow a 180 degree turn angle between in/out segments.) The following function tries to find
 // the best possible match for every tag in a given intersection, considering a few corner cases
 // introduced to OSRM handling u-turns
-typename Intersection::const_iterator findBestMatch(const TurnLaneType::Mask tag,
-                                                    const Intersection &intersection)
+typename ConnectedRoads::const_iterator findBestMatch(const TurnLaneType::Mask tag,
+                                                      const ConnectedRoads &intersection)
 {
     return std::min_element(intersection.begin(),
                             intersection.end(),
@@ -141,8 +141,8 @@ typename Intersection::const_iterator findBestMatch(const TurnLaneType::Mask tag
 // by default in OSRM. Therefor we cannot check whether a turn is allowed, since it could be
 // possible that it is forbidden. In addition, the best u-turn angle does not necessarily represent
 // the u-turn, since it could be a sharp-left turn instead on a road with a middle island.
-typename Intersection::const_iterator findBestMatchForReverse(const TurnLaneType::Mask neighbor_tag,
-                                                              const Intersection &intersection)
+typename ConnectedRoads::const_iterator
+findBestMatchForReverse(const TurnLaneType::Mask neighbor_tag, const ConnectedRoads &intersection)
 {
     const auto neighbor_itr = findBestMatch(neighbor_tag, intersection);
     if (neighbor_itr + 1 == intersection.cend())
@@ -168,7 +168,7 @@ typename Intersection::const_iterator findBestMatchForReverse(const TurnLaneType
 
 // a match is trivial if all turns can be associated with their best match in a valid way and the
 // matches occur in order
-bool canMatchTrivially(const Intersection &intersection, const LaneDataVector &lane_data)
+bool canMatchTrivially(const ConnectedRoads &intersection, const LaneDataVector &lane_data)
 {
     std::size_t road_index = 1, lane = 0;
     if (!lane_data.empty() && lane_data.front().tag == TurnLaneType::uturn)
@@ -196,11 +196,11 @@ bool canMatchTrivially(const Intersection &intersection, const LaneDataVector &l
            (lane + 1 == lane_data.size() && lane_data.back().tag == TurnLaneType::uturn);
 }
 
-Intersection triviallyMatchLanesToTurns(Intersection intersection,
-                                        const LaneDataVector &lane_data,
-                                        const util::NodeBasedDynamicGraph &node_based_graph,
-                                        const LaneDescriptionID lane_string_id,
-                                        LaneDataIdMap &lane_data_to_id)
+ConnectedRoads triviallyMatchLanesToTurns(ConnectedRoads intersection,
+                                          const LaneDataVector &lane_data,
+                                          const util::NodeBasedDynamicGraph &node_based_graph,
+                                          const LaneDescriptionID lane_string_id,
+                                          LaneDataIdMap &lane_data_to_id)
 {
     std::size_t road_index = 1, lane = 0;
 
