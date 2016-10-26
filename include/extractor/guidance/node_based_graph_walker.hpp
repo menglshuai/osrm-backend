@@ -43,7 +43,7 @@ class NodeBasedGraphWalker
     boost::optional<std::pair<NodeID, EdgeID>> TraverseRoad(NodeID starting_at_node_id,
                                                             EdgeID following_edge_id,
                                                             accumulator_type &accumulator,
-                                                            const selector_type &selector);
+                                                            const selector_type &selector) const;
 
   private:
     const util::NodeBasedDynamicGraph &node_based_graph;
@@ -87,7 +87,8 @@ struct LengthLimitedCoordinateAccumulator
 };
 
 /*
- * The SelectRoadByNameOnlyChoiceAndStraightness tries to follow a given name along a route. We offer methods to skip
+ * The SelectRoadByNameOnlyChoiceAndStraightness tries to follow a given name along a route. We
+ * offer methods to skip
  * over bridges/similar situations if desired, following narrow turns
  * This struct offers an example implementation of a possible road selector for traversing the
  * node-based graph using the NodeBasedGraphWalker
@@ -115,14 +116,13 @@ struct SelectRoadByNameOnlyChoiceAndStraightness
 // find the next intersection given a hop limit
 struct IntersectionFinderAccumulator
 {
-    IntersectionFinderAccumulator(const std::uint8_t hop_limit, const IntersectionGenerator &intersection_generator);
+    IntersectionFinderAccumulator(const std::uint8_t hop_limit,
+                                  const IntersectionGenerator &intersection_generator);
     // true if the path has traversed enough distance
     bool terminate();
 
     // update the accumulator
-    void update(const NodeID from_node,
-                const EdgeID via_edge,
-                const NodeID to_node);
+    void update(const NodeID from_node, const EdgeID via_edge, const NodeID to_node);
 
     std::uint8_t hops;
     const std::uint8_t hop_limit;
@@ -136,14 +136,12 @@ struct IntersectionFinderAccumulator
     Intersection intersection;
 };
 
-
-
 template <class accumulator_type, class selector_type>
 boost::optional<std::pair<NodeID, EdgeID>>
 NodeBasedGraphWalker::TraverseRoad(NodeID current_node_id,
                                    EdgeID current_edge_id,
                                    accumulator_type &accumulator,
-                                   const selector_type &selector)
+                                   const selector_type &selector) const
 {
     /*
      * since graph hopping is used in many ways, we don't generate an adjusted intersection
