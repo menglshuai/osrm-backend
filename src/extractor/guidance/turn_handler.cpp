@@ -481,12 +481,12 @@ ConnectedRoads TurnHandler::assignRightTurns(const EdgeID via_edge,
 std::pair<std::size_t, std::size_t> TurnHandler::findFork(const EdgeID via_edge,
                                                           const ConnectedRoads &connected_roads) const
 {
-
     std::size_t best = 0;
     double best_deviation = 180;
+    const auto number_of_connected_roads = connected_roads.size();
 
-    // find the connected_roads[best] that is the closest to being a straight turn
-    for (std::size_t i = 1; i < connected_roads.size(); ++i)
+    // find the connected_roads[best] that is the closest to a turn going straight
+    for (std::size_t i = 1; i < number_of_connected_roads; ++i)
     {
         const double deviation = angularDeviation(connected_roads[i].angle, STRAIGHT_ANGLE);
         if (connected_roads[i].entry_allowed && deviation < best_deviation)
@@ -527,41 +527,48 @@ std::pair<std::size_t, std::size_t> TurnHandler::findFork(const EdgeID via_edge,
         // fork candidates
         std::size_t left = best, right = best;
 
-        // find the leftmost road that is either narrow to the straight angle
-        // or narrow to a road that can be seen as/grouped with going straight
-        //
-        // decyphering the while condition:
-        // increment left++
-        //
-        //      if the connected_road[best] is not the most left turn
-        // AND
-        //          the angle between connected_road[left+1] and STRAIGHT is narrow
-        //      OR
-        //              the angle between connected_road[left] and connected_road[left+1] is narrow
-        //          AND
-        //              the angle between connected_roads[left] and STRAIGHT is small
-        //
-        // @CHAU_TODO rewrite while loop; const `connected_roads.size()`; angular deviation computation
-        while (
-            left + 1 < connected_roads.size() &&
-            (angularDeviation(connected_roads[left + 1].angle, STRAIGHT_ANGLE) <= NARROW_TURN_ANGLE ||
-             (angularDeviation(connected_roads[left].angle, connected_roads[left + 1].angle) <=
-                  NARROW_TURN_ANGLE &&
-              angularDeviation(connected_roads[left].angle, STRAIGHT_ANGLE) <= GROUP_ANGLE)))
+        // find the leftmost road that might be part of a fork
+        while (left + 1 < number_of_connected_roads)
         {
-            ++left;
+            const auto angle_between_next_road_and_straight = angularDeviation(connected_roads[left + 1].angle, STRAIGHT_ANGLE);
+            const auto angle_between_next_road_and_left = angularDeviation(connected_roads[left].angle, connected_roads[left + 1].angle);
+            const auto angle_between_left_road_and_straight = angularDeviation(connected_roads[left].angle, STRAIGHT_ANGLE);
+
+            // check next left road if it is narrow to going straight
+            if (angle_between_next_road_and_straight <= NARROW_TURN_ANGLE)
+            {
+                ++left;
+            }
+            // check next left road if it is narrow to a road that can be seen as/grouped with going straight
+            else if (angle_between_next_road_and_left <= NARROW_TURN_ANGLE && angle_between_left_road_and_straight <= GROUP_ANGLE)
+            {
+                ++left;
+            }
+            else
+            {
+                break;
+            }
         }
-        // find the rightmost road that is either narrow to the straight angle
-        // or narrow to another road that can can be seen as/grouped with going straight
-        // @CHAU_TODO rewrite while loop
-        while (
-            right > 1 &&
-            (angularDeviation(connected_roads[right - 1].angle, STRAIGHT_ANGLE) <= NARROW_TURN_ANGLE ||
-             (angularDeviation(connected_roads[right].angle, connected_roads[right - 1].angle) <
-                  NARROW_TURN_ANGLE &&
-              angularDeviation(connected_roads[right - 1].angle, STRAIGHT_ANGLE) <= GROUP_ANGLE)))
+
+        // find the rightmost road that might be part of a fork
+        while (right > 1)
         {
-            --right;
+            const auto angle_between_right_road_and_straight = angularDeviation(connected_roads[right].angle, STRAIGHT_ANGLE);
+            const auto angle_between_prev_road_and_straight = angularDeviation(connected_roads[right - 1].angle, STRAIGHT_ANGLE);
+            const auto angle_between_prev_road_and_right = angularDeviation(connected_roads[right].angle, connected_roads[right - 1].angle);
+
+            if (angle_between_prev_road_and_straight <= NARROW_TURN_ANGLE)
+            {
+                --right;
+            }
+            else if (angle_between_prev_road_and_right <= NARROW_TURN_ANGLE && angle_between_right_road_and_straight <= GROUP_ANGLE)
+            {
+                --right;
+            }
+            else
+            {
+                break;
+            }
         }
 
         // if the leftmost and rightmost roads with the conditions above are the same
@@ -572,24 +579,34 @@ std::pair<std::size_t, std::size_t> TurnHandler::findFork(const EdgeID via_edge,
         }
 
 
-        // @CHAU_TODO check which bools make more sense as BOOST_ASSERT
-        const bool valid_indices = 0 < right && right < left;
+        BOOST_ASSERT(0 < right);
+        BOOST_ASSERT(right < left);
+
+        // makes sure that the fork is isolated from other neighbouring streets on the left and
+        // right side
         const bool separated_at_left_side =
             angularDeviation(connected_roads[left].angle,
-                             connected_roads[(left + 1) % connected_roads.size()].angle) >= GROUP_ANGLE;
+                             connected_roads[(left + 1) % number_of_connected_roads].angle) >=
+            GROUP_ANGLE;
         const bool separated_at_right_side =
-            right > 0 &&
             angularDeviation(connected_roads[right].angle, connected_roads[right - 1].angle) >=
-                GROUP_ANGLE;
+            GROUP_ANGLE;
 
-        const bool not_more_than_three = (left - right) <= 2;
+        // there cannot be a fork of more than three streets
+        std::size_t size_of_fork = left - right + 1;
+        const bool not_more_than_three_old = (left - right) <= 2;
+        const bool not_more_than_three = size_of_fork <= 3;
+
+        // check whether there is an obvious turn to take; forks are never obvious - if there is an
+        // obvious turn, it's not a fork
         const bool has_obvious = [&]() {
-            if (left - right == 1)
+            // @CHAU_TODO: refactor this in separate task
+            if (size_of_fork == 2)
             {
                 return isObviousOfTwo(via_edge, connected_roads[left], connected_roads[right]) ||
                        isObviousOfTwo(via_edge, connected_roads[right], connected_roads[left]);
             }
-            else if (left - right == 2)
+            else if (size_of_fork == 3)
             {
                 return isObviousOfTwo(via_edge, connected_roads[right + 1], connected_roads[right]) ||
                        isObviousOfTwo(via_edge, connected_roads[right], connected_roads[right + 1]) ||
@@ -601,40 +618,17 @@ std::pair<std::size_t, std::size_t> TurnHandler::findFork(const EdgeID via_edge,
 
         // A fork can only happen between edges of similar types where none of the ones is obvious
         const bool has_compatible_classes = [&]() {
-            // @CHAU_TODO rename to link_class
             // if any of the considered roads is a link road, it cannot be a fork
             // except if incoming edge is also a link road
-            const bool ramp_class = node_based_graph.GetEdgeData(connected_roads[right].eid)
+            const bool link_class = node_based_graph.GetEdgeData(connected_roads[right].eid)
                                         .road_classification.IsLinkClass();
             for (std::size_t index = right + 1; index <= left; ++index)
             {
-                if (ramp_class !=
+                if (link_class !=
                     node_based_graph.GetEdgeData(connected_roads[index].eid)
                         .road_classification.IsLinkClass())
                 {
                     return false;
-                }
-            }
-
-            // check all road classes and whether any road is obvious by its class
-            // @CHAU_TODO check whether this is not already covered by `has_obvious`
-            const auto in_classification =
-                node_based_graph.GetEdgeData(connected_roads[0].eid).road_classification;
-            for (std::size_t base_index = right; base_index <= left; ++base_index)
-            {
-                const auto base_classification =
-                    node_based_graph.GetEdgeData(connected_roads[base_index].eid).road_classification;
-                for (std::size_t compare_index = right; compare_index <= left; ++compare_index)
-                {
-                    if (base_index == compare_index)
-                        continue;
-
-                    const auto compare_classification =
-                        node_based_graph.GetEdgeData(connected_roads[compare_index].eid)
-                            .road_classification;
-                    if (obviousByRoadClass(
-                            in_classification, base_classification, compare_classification))
-                        return false;
                 }
             }
             return true;
@@ -642,7 +636,7 @@ std::pair<std::size_t, std::size_t> TurnHandler::findFork(const EdgeID via_edge,
 
         // check if all entries in the fork range allow entry
         const bool only_valid_entries = [&]() {
-            BOOST_ASSERT(right <= left && left < connected_roads.size());
+            BOOST_ASSERT(right <= left && left < number_of_connected_roads);
 
             // one past the end of the fork range
             const auto end_itr = connected_roads.begin() + left + 1;
@@ -658,7 +652,7 @@ std::pair<std::size_t, std::size_t> TurnHandler::findFork(const EdgeID via_edge,
         }();
 
         // TODO check whether 2*NARROW_TURN is too large
-        if (valid_indices && separated_at_left_side && separated_at_right_side &&
+        if (separated_at_left_side && separated_at_right_side &&
             not_more_than_three && !has_obvious && has_compatible_classes && only_valid_entries)
             return std::make_pair(right, left);
     }
