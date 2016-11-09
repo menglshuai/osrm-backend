@@ -166,7 +166,7 @@ operator()(const NodeID /*nid*/, const EdgeID source_edge_id, Intersection inter
         //         `    .
         //           `  .
         //              d     < `target_intersection` is intersection at `d`
-        //              .
+        //              .       `sliproad_edge_target` is node `d`
         //              e
         //
         //
@@ -194,9 +194,20 @@ operator()(const NodeID /*nid*/, const EdgeID source_edge_id, Intersection inter
             return intersection;
         }(intersection_node_id);
 
+        const NodeID sliproad_edge_target = node_based_graph.GetTarget(sliproad_edge);
+
+        // Distinct triangle nodes `bcd`
+        if (intersection_node_id == next->node || intersection_node_id == sliproad_edge_target ||
+            next->node == sliproad_edge_target)
+        {
+            continue;
+        }
+
         // If the sliproad candidate is a through street, we cannot handle it as a sliproad.
         if (isThroughStreet(sliproad_edge, target_intersection))
+        {
             continue;
+        }
 
         // If `sliproad` is tagged as link or ramp it's a Sliproad by definition.
         const auto &sliproad_data = node_based_graph.GetEdgeData(sliproad_edge);
