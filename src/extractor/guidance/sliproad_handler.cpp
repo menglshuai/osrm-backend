@@ -291,11 +291,15 @@ operator()(const NodeID /*nid*/, const EdgeID source_edge_id, Intersection inter
             const auto second = node_info_list[next->node];          // c
             const auto third = node_info_list[sliproad_edge_target]; // d
 
-            const auto area = signedArea(first, second, third);
+            const auto length = haversineDistance(first, second); // bc
+            const auto heigth = haversineDistance(second, third); // cd
+
+            // This is a simple approximation, but should hold for Sliproad scenarios
+            const auto area = (length * heigth) / 2.;
 
             // Everything below is data issue - there are some weird situations where
             // nodes are really close to each other and / or tagging ist just plain off.
-            const constexpr auto MIN_AREA = 5.;
+            const constexpr auto MIN_AREA = 3.;
 
             if (area < MIN_AREA || area > MAX_SLIPROAD_THRESHOLD * MAX_SLIPROAD_THRESHOLD)
                 continue;
