@@ -273,20 +273,47 @@ operator()(const NodeID /*nid*/, const EdgeID source_edge_id, Intersection inter
 
             auto snuggles = false;
 
+            using namespace util::coordinate_calculation;
+
             if (is_right_turn)
             {
-                snuggles = std::all_of(first, last, [=](auto each) {
-                    return !util::coordinate_calculation::isCCW(start_coord, each, end_coord);
+                snuggles = std::all_of(first, last, [=](auto each) { //
+                    return !isCCW(start_coord, each, end_coord);
                 });
             }
             else if (is_left_turn)
             {
-                snuggles = std::all_of(first, last, [=](auto each) {
-                    return util::coordinate_calculation::isCCW(start_coord, each, end_coord);
+                snuggles = std::all_of(first, last, [=](auto each) { //
+                    return isCCW(start_coord, each, end_coord);
                 });
             }
 
             if (!snuggles)
+                continue;
+        }
+
+        // Check for area under triangle `bdc`.
+        //
+        // a ... b .... c .
+        //       `      .
+        //         `    .
+        //           `  .
+        //              d
+        //
+        {
+            using namespace util::coordinate_calculation;
+
+            const auto first = node_info_list[intersection_node_id]; // b
+            const auto second = node_info_list[next->node];          // c
+            const auto third = node_info_list[sliproad_edge_target]; // d
+
+            const auto area = signedArea(first, second, third);
+
+            // Everything below is data issue - there are some weird situations where
+            // nodes are really close to each other and / or tagging ist just plain off.
+            const constexpr auto MIN_AREA = 5.;
+
+            if (area < MIN_AREA || area > MAX_SLIPROAD_THRESHOLD * MAX_SLIPROAD_THRESHOLD)
                 continue;
         }
 
