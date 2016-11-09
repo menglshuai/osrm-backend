@@ -209,22 +209,6 @@ operator()(const NodeID /*nid*/, const EdgeID source_edge_id, Intersection inter
             continue;
         }
 
-        // If `sliproad` is tagged as link or ramp it's a Sliproad by definition.
-        const auto &sliproad_data = node_based_graph.GetEdgeData(sliproad_edge);
-
-        const auto is_ramp = sliproad_data.road_classification.IsRampClass();
-        const auto is_link = sliproad_data.road_classification.IsLinkClass();
-
-        if (is_ramp || is_link)
-        {
-            sliproad.instruction.type = TurnType::Sliproad;
-            sliproad_found = true;
-            continue;
-        }
-
-        // Unfortunately, not all (not even the most) Sliproads are tagged link or ramp.
-        // Use some heuristics such as angles, curvature, etc. to classify Sliproads.
-
         // Check for a narrow angle turn onto road `de` the Sliproad adapts to
         {
             const auto it = target_intersection.findClosestTurn(STRAIGHT_ANGLE);
