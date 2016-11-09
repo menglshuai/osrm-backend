@@ -256,6 +256,10 @@ operator()(const NodeID /*nid*/, const EdgeID source_edge_id, Intersection inter
 
             auto snuggles = false;
 
+            // In addition, if it's a right/left turn we expect the rightmost/leftmost
+            // turn at `c` to be more or less ~90 degree for a Sliproad scenario.
+            auto is_perpendicular_turn = false;
+
             using namespace util::coordinate_calculation;
 
             if (is_right_turn)
@@ -263,15 +267,23 @@ operator()(const NodeID /*nid*/, const EdgeID source_edge_id, Intersection inter
                 snuggles = std::all_of(first, last, [=](auto each) { //
                     return !isCCW(start_coord, each, end_coord);
                 });
+
+                const auto rightmost = next->intersection[1];
+                is_perpendicular_turn = angularDeviation(rightmost.angle, STRAIGHT_ANGLE) <= //
+                                        90 + FUZZY_ANGLE_DIFFERENCE;                         //
             }
             else if (is_left_turn)
             {
                 snuggles = std::all_of(first, last, [=](auto each) { //
                     return isCCW(start_coord, each, end_coord);
                 });
+
+                const auto leftmost = next->intersection.back();
+                is_perpendicular_turn = angularDeviation(leftmost.angle, STRAIGHT_ANGLE) <= //
+                                        90 + FUZZY_ANGLE_DIFFERENCE;                        //
             }
 
-            if (!snuggles)
+            if (!snuggles || !is_perpendicular_turn)
                 continue;
         }
 
