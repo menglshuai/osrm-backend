@@ -209,20 +209,19 @@ operator()(const NodeID /*nid*/, const EdgeID source_edge_id, Intersection inter
             continue;
         }
 
-        // Check for a narrow angle turn onto road `de` the Sliproad adapts to
+        // The turn off of the Sliproad has to be obvious and a narrow turn
         {
-            const auto it = target_intersection.findClosestTurn(STRAIGHT_ANGLE);
+            const auto index = findObviousTurn(sliproad_edge, target_intersection);
 
-            if (it == end(target_intersection))
+            if (index == 0)
                 continue;
 
-            const auto onto_angle_deviation = angularDeviation(it->angle, STRAIGHT_ANGLE);
-            const auto is_narrow_onto_turn = onto_angle_deviation <= 2 * NARROW_TURN_ANGLE;
+            const auto onto = target_intersection[index];
+            const auto angle_deviation = angularDeviation(onto.angle, STRAIGHT_ANGLE);
+            const auto is_narrow_turn = angle_deviation <= 2 * NARROW_TURN_ANGLE;
 
-            if (!is_narrow_onto_turn)
-            {
+            if (!is_narrow_turn)
                 continue;
-            }
         }
 
         // Check for curvature. Depending on the turn's direction at `c`. Scenario for right turn:
