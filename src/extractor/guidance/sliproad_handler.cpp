@@ -79,25 +79,18 @@ operator()(const NodeID /*nid*/, const EdgeID source_edge_id, Intersection inter
 
     // Potential non-sliproad road (bc), leading to the intersection (c) the Sliproad (bd) shortcuts
     const auto &next_road = intersection[*obvious];
-    const auto next_road_edge_data = node_based_graph.GetEdgeData(next_road.eid);
 
-    const auto source_edge_data = node_based_graph.GetEdgeData(source_edge_id);
+    // The intersection `c` has to be reachable
+    if (!next_road.entry_allowed)
+    {
+        return intersection;
+    }
 
     // The road leading to the intersection (bc) has to continue from our source
+    if (!roadContinues(source_edge_id, next_road.eid))
     {
-        auto same_road_category =
-            next_road_edge_data.road_classification == source_edge_data.road_classification;
-
-        auto same_name = source_edge_data.name_id != EMPTY_NAMEID &&    //
-                         next_road_edge_data.name_id != EMPTY_NAMEID && //
-                         !util::guidance::requiresNameAnnounced(source_edge_data.name_id,
-                                                                next_road_edge_data.name_id,
-                                                                name_table,
-                                                                street_name_suffix_table); //
-
-        if (!same_road_category || !same_name || !next_road.entry_allowed)
-            return intersection;
-    };
+        return intersection;
+    }
 
     // Link-check for (bc) and later on (cd) which both are getting shortcutted by Sliproad
     const auto is_potential_link = [this, next_road](const ConnectedRoad &road) {
@@ -364,6 +357,7 @@ operator()(const NodeID /*nid*/, const EdgeID source_edge_id, Intersection inter
     // In those cases the obvious non-Sliproad is now obvious and we discard the Fork turn type.
     if (sliproad_found && next_road.instruction.type == TurnType::Fork)
     {
+        const auto &source_edge_data = node_based_graph.GetEdgeData(source_edge_id);
         const auto &next_data = node_based_graph.GetEdgeData(next_road.eid);
 
         const auto same_name = source_edge_data.name_id != EMPTY_NAMEID && //
@@ -574,6 +568,25 @@ bool SliproadHandler::isThroughStreet(const EdgeID from, const Intersection &int
     };
 
     return std::find_if(first, last, same_name) != last;
+}
+
+bool SliproadHandler::roadContinues(const EdgeID current, const EdgeID next) const
+{
+    const auto current_data = node_based_graph.GetEdgeData(current);
+    const auto next_data = node_based_graph.GetEdgeData(next);
+
+    auto same_road_category = current_data.road_classification == next_data.road_classification;
+    auto same_travel_mode = current_data.travel_mode == next_data.travel_mode;
+
+    auto same_name = current_data.name_id != EMPTY_NAMEID && //
+                     next_data.name_id != EMPTY_NAMEID &&    //
+                     !util::guidance::requiresNameAnnounced(current_data.name_id,
+                                                            next_data.name_id,
+                                                            name_table,
+                                                            street_name_suffix_table); //
+
+    const auto continues = same_road_category && same_travel_mode && same_name;
+    return continues;
 }
 
 bool SliproadHandler::canBeTargetOfSliproad(const Intersection &intersection)

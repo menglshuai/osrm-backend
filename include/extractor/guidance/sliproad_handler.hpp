@@ -72,6 +72,9 @@ class SliproadHandler final : public IntersectionHandler
     // Through street: does a road continue with from's name at the intersection
     bool isThroughStreet(const EdgeID from, const Intersection &intersection) const;
 
+    // Does the road from `current` to `next` continue
+    bool roadContinues(const EdgeID current, const EdgeID next) const;
+
     // Could a Sliproad reach this intersection?
     static bool canBeTargetOfSliproad(const Intersection &intersection);
 };
