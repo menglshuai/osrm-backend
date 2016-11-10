@@ -495,11 +495,9 @@ Feature: Slipways and Dedicated Turn Lanes
                         .
           s . a . . . . b . . c
                 `       .
-                 `      .
-                  `     .
                    `    .
-                    `   .
                      `  .
+                      ` .
                       ` .
                         e
                         .`
@@ -590,13 +588,9 @@ Feature: Slipways and Dedicated Turn Lanes
                           .
           s . a . . . . . b . . c
                `          .
-                `         .
-                 `        .
-                  t       .
-                   `      .
+                  `       .
                     `     .
-                     `    .
-                      `   .
+                      t   .
                        `  .
                         ` e
                           .
@@ -626,15 +620,11 @@ Feature: Slipways and Dedicated Turn Lanes
                           .
           s . a . . . . . b . . c
                `          .
-                `         .
-                 `        .
                   `       .
-                   `      .
-                    `     .
                      `    .
-                      `   .
                        `  .
-                        ` e
+                        ` .
+                          e
                           .
                           .
                           f
@@ -658,8 +648,6 @@ Feature: Slipways and Dedicated Turn Lanes
           s . a . . b . . c
                `    .
                  .  e
-                  . .
-                  . .
                   . .
                    ..
                     .
