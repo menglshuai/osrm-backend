@@ -488,6 +488,29 @@ Feature: Slipways and Dedicated Turn Lanes
             | waypoints | route              | turns                               |
             | s,f       | sabc,aeg,dbef,dbef | depart,turn right,turn right,arrive |
 
+    Scenario: Through Street, not a Sliproad although obvious
+        Given the node map
+            """
+                    d
+                    .
+          s . a . . b . . c
+                `   .
+                  ` e
+                  .  `
+                 .     `
+                f        g
+            """
+
+        And the ways
+            | nodes | highway | name  |
+            | sabc  | primary | sabc  |
+            | dbef  | primary | dbef  |
+            | aeg   | primary | aeg   |
+
+       When I route I should get
+            | waypoints | route              | turns                               |
+            | s,f       | sabc,aeg,dbef,dbef | depart,turn right,turn right,arrive |
+
     Scenario: Sliproad target turn is restricted
         Given the node map
             """
